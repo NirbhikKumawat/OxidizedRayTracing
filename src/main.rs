@@ -22,12 +22,13 @@ fn main() -> std::io::Result<()> {
     let image_width = 400;
     let viewport_height = 2.0;
     let focal_length = 1.0;
+    let samples_per_pixel = 10;
 
     let mut world = HittableList::new();
     world.add(Box::new(Sphere::new(Point3::new(0f64,0f64,-1f64),0.5)));
     world.add(Box::new(Sphere::new(Point3::new(0f64,-100.5,-1f64),100.0)));
 
-    let camera = Camera::new(aspect_ratio,image_width,Point3::new(0.0,0.0,0.0),viewport_height,focal_length);
+    let camera = Camera::new(aspect_ratio,image_width,Point3::new(0.0,0.0,0.0),viewport_height,focal_length,samples_per_pixel);
     camera.render(&world, &mut writer)?;
     Ok(())
 
