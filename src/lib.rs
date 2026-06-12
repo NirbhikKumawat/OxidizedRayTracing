@@ -6,3 +6,4 @@ pub mod sphere;
 pub mod hittable_list;
 pub mod utility;
 pub mod interval;
+pub mod camera;
