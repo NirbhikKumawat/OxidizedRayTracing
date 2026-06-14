@@ -3,7 +3,7 @@ use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::utility::{INFINITY, random_f64};
+use crate::utility::{INFINITY, random_f64, degrees_to_radians};
 use crate::vec3::{Point3, Vec3};
 use std::io::Write;
 
@@ -23,26 +23,39 @@ impl Camera {
     pub fn new(
         aspect_ratio: f64,
         image_width: u32,
-        center: Point3,
-        viewport_height: f64,
-        focal_length: f64,
         samples_per_pixel: u32,
         max_depth: u32,
+        vfov: f64,
+        look_from: Point3,
+        look_at: Point3,
+        vup: Vec3,
     ) -> Self {
         let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         if image_height < 1 {
             image_height = 1;
         }
+        let center = look_from;
+
+        let focal_length = (look_from-look_at).length();
+
+        let theta = degrees_to_radians(vfov);
+        let h = (theta/2.0).tan();
+
+        let viewport_height = 2.0 * h *focal_length;
         let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
 
-        let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
+        let w = (look_from-look_at).unit_vector();
+        let u = vup.cross(w).unit_vector();
+        let v = w.cross(u);
+
+        let viewport_u = viewport_width * u;
+        let viewport_v = -viewport_height * v;
 
         let pixel_data_u = viewport_u / image_width as f64;
         let pixel_data_v = viewport_v / image_height as f64;
 
         let viewport_upper_left =
-            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+            center - (focal_length*w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_data_u + pixel_data_v);
 
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;

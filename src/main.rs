@@ -3,7 +3,7 @@ use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
 use OxidisedRayTracing::sphere::Sphere;
-use OxidisedRayTracing::vec3::Point3;
+use OxidisedRayTracing::vec3::{Point3, Vec3};
 use std::env;
 use std::fs::File;
 use std::io::BufWriter;
@@ -21,10 +21,12 @@ fn main() -> std::io::Result<()> {
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
-    let viewport_height = 2.0;
-    let focal_length = 1.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point3::new(-2.0,2.0,1.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
 
     let mut world = HittableList::new();
 
@@ -63,11 +65,12 @@ fn main() -> std::io::Result<()> {
     let camera = Camera::new(
         aspect_ratio,
         image_width,
-        Point3::new(0.0, 0.0, 0.0),
-        viewport_height,
-        focal_length,
         samples_per_pixel,
         max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup
     );
     camera.render(&world, &mut writer)?;
     Ok(())
