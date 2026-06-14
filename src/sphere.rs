@@ -46,6 +46,12 @@ impl Hittable for Sphere {
             front_face = false;
         }
         let mat = Arc::clone(&self.mat);
-        Some(HitRecord { t, p, normal, mat,front_face })
+        Some(HitRecord {
+            t,
+            p,
+            normal,
+            mat,
+            front_face,
+        })
     }
 }

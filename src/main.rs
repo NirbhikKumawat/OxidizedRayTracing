@@ -23,14 +23,14 @@ fn main() -> std::io::Result<()> {
     let image_width = 400;
     let viewport_height = 2.0;
     let focal_length = 1.0;
-    let samples_per_pixel = 10;
+    let samples_per_pixel = 100;
     let max_depth = 50;
 
     let mut world = HittableList::new();
 
     let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
     let material_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let material_left = Arc::new(Dielectric::new(1.5));
+    let material_left = Arc::new(Dielectric::new(1.00 / 1.33));
     let material_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
 
     world.add(Box::new(Sphere::new(

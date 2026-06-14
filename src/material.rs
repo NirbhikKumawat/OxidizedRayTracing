@@ -8,7 +8,7 @@ pub struct ScatteredRecord {
     pub scattered: Ray,
 }
 pub trait Material: Send + Sync {
-    fn scatter(&self, rin: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
+    fn scatter(&self, _: &Ray, _: &HitRecord) -> Option<ScatteredRecord> {
         None
     }
 }
@@ -21,7 +21,7 @@ impl Lambertian {
     }
 }
 impl Material for Lambertian {
-    fn scatter(&self, rin: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
+    fn scatter(&self, _: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
         let mut scatter_direction = record.normal + Vec3::random_unit_vector();
         if scatter_direction.near_zero() {
             scatter_direction = record.normal;
@@ -57,7 +57,7 @@ impl Material for Metal {
                 attenuation,
                 scattered,
             })
-        }else{
+        } else {
             None
         }
     }
@@ -67,21 +67,30 @@ pub struct Dielectric {
 }
 impl Dielectric {
     pub fn new(index: f64) -> Self {
-        Self { refractive_index: index }
+        Self {
+            refractive_index: index,
+        }
     }
 }
 impl Material for Dielectric {
     fn scatter(&self, rin: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let ri = if record.front_face {
-            1.0/self.refractive_index
-        }else{
+            1.0 / self.refractive_index
+        } else {
             self.refractive_index
         };
+        let cos_theta = rin.direction().dot(-record.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let cannot_refract = ri * sin_theta > 1.0;
         let unit_direction = rin.direction().unit_vector();
-        let refracted = unit_direction.refract(record.normal, ri);
-        let scattered = Ray::new(record.p, refracted);
-        Some(ScatteredRecord{
+        let direction = if cannot_refract {
+            unit_direction.reflect(record.normal)
+        } else {
+            unit_direction.refract(record.normal, ri)
+        };
+        let scattered = Ray::new(record.p, direction);
+        Some(ScatteredRecord {
             attenuation,
             scattered,
         })
