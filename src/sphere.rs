@@ -3,20 +3,17 @@ use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::vec3::Point3;
 
-pub struct Sphere{
+pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
 }
 impl Sphere {
     pub fn new(center: Point3, radius: f64) -> Self {
-        Self{
-            center,
-            radius,
-        }
+        Self { center, radius }
     }
 }
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t:Interval) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t: Interval) -> Option<HitRecord> {
         let oc = self.center - ray.origin();
         let a = ray.direction().length_squared();
         let h = oc.dot(ray.direction());
@@ -26,9 +23,9 @@ impl Hittable for Sphere {
             return None;
         }
         let sqrt_d = discriminant.sqrt();
-        let mut root = (h-sqrt_d) / a;
+        let mut root = (h - sqrt_d) / a;
         if !t.surrounds(root) {
-            root = (h+sqrt_d) / a;
+            root = (h + sqrt_d) / a;
             if !t.surrounds(root) {
                 return None;
             }
@@ -39,9 +36,6 @@ impl Hittable for Sphere {
         if normal.dot(ray.direction()) >= 0.0 {
             normal = -normal;
         }
-        Some(HitRecord{
-            t,p,normal
-        })
-
+        Some(HitRecord { t, p, normal })
     }
 }

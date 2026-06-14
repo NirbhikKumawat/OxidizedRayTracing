@@ -1,21 +1,30 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
+use crate::utility::{random_double, random_f64};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+};
 
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
-pub struct Vec3{
-    e: [f64; 3]
+pub struct Vec3 {
+    e: [f64; 3],
 }
 pub type Point3 = Vec3;
 impl Vec3 {
     #[inline]
     pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self{e: [x, y, z]}
+        Self { e: [x, y, z] }
     }
     #[inline]
-    pub fn x(&self) -> f64 { self.e[0] }
+    pub fn x(&self) -> f64 {
+        self.e[0]
+    }
     #[inline]
-    pub fn y(&self) -> f64 { self.e[1] }
+    pub fn y(&self) -> f64 {
+        self.e[1]
+    }
     #[inline]
-    pub fn z(&self) -> f64 { self.e[2] }
+    pub fn z(&self) -> f64 {
+        self.e[2]
+    }
     #[inline]
     pub fn length_squared(&self) -> f64 {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
@@ -38,14 +47,51 @@ impl Vec3 {
     }
     #[inline]
     pub fn unit_vector(self) -> Self {
-        self/self.length()
+        self / self.length()
+    }
+    pub fn random_vector() -> Self {
+        Self {
+            e: [random_f64(), random_f64(), random_f64()],
+        }
+    }
+    pub fn random_vector3(min: f64, max: f64) -> Self {
+        Self {
+            e: [
+                random_double(min, max),
+                random_double(min, max),
+                random_double(min, max),
+            ],
+        }
+    }
+    #[inline]
+    pub fn random_unit_vector() -> Self {
+        loop {
+            let p = Vec3::random_vector3(-1.0, 1.0);
+            let lensq = p.length_squared();
+            if lensq <= 1.0 && 1e-160 < lensq {
+                return p / lensq.sqrt();
+            }
+        }
+    }
+    #[inline]
+    pub fn random_on_hemisphere(normal: Vec3) -> Self {
+        let on_unit_sphere = Self::random_unit_vector();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 }
 impl Add for Vec3 {
     type Output = Vec3;
     #[inline]
     fn add(self, other: Vec3) -> Self::Output {
-        Self::new(self.e[0] + other.e[0], self.e[1] + other.e[1], self.e[2] + other.e[2])
+        Self::new(
+            self.e[0] + other.e[0],
+            self.e[1] + other.e[1],
+            self.e[2] + other.e[2],
+        )
     }
 }
 impl AddAssign for Vec3 {
@@ -60,7 +106,11 @@ impl Sub for Vec3 {
     type Output = Vec3;
     #[inline]
     fn sub(self, other: Vec3) -> Self::Output {
-        Self::new(self.e[0] - other.x(), self.e[1] - other.y(), self.e[2] - other.z())
+        Self::new(
+            self.e[0] - other.x(),
+            self.e[1] - other.y(),
+            self.e[2] - other.z(),
+        )
     }
 }
 impl SubAssign for Vec3 {
@@ -89,7 +139,11 @@ impl Mul<Vec3> for Vec3 {
     type Output = Vec3;
     #[inline]
     fn mul(self, other: Vec3) -> Self::Output {
-        Self::new(self.e[0]*other.e[0], self.e[1]*other.e[1], self.e[2]*other.e[2])
+        Self::new(
+            self.e[0] * other.e[0],
+            self.e[1] * other.e[1],
+            self.e[2] * other.e[2],
+        )
     }
 }
 impl MulAssign<f64> for Vec3 {

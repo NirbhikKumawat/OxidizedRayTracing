@@ -1,12 +1,10 @@
-use std::env;
-use std::fs::File;
-use std::io::{BufWriter};
 use OxidisedRayTracing::camera::Camera;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::sphere::Sphere;
-use OxidisedRayTracing::vec3::{Point3};
-
-
+use OxidisedRayTracing::vec3::Point3;
+use std::env;
+use std::fs::File;
+use std::io::BufWriter;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -25,12 +23,20 @@ fn main() -> std::io::Result<()> {
     let samples_per_pixel = 10;
 
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(Point3::new(0f64,0f64,-1f64),0.5)));
-    world.add(Box::new(Sphere::new(Point3::new(0f64,-100.5,-1f64),100.0)));
+    world.add(Box::new(Sphere::new(Point3::new(0f64, 0f64, -1f64), 0.5)));
+    world.add(Box::new(Sphere::new(
+        Point3::new(0f64, -100.5, -1f64),
+        100.0,
+    )));
 
-    let camera = Camera::new(aspect_ratio,image_width,Point3::new(0.0,0.0,0.0),viewport_height,focal_length,samples_per_pixel);
+    let camera = Camera::new(
+        aspect_ratio,
+        image_width,
+        Point3::new(0.0, 0.0, 0.0),
+        viewport_height,
+        focal_length,
+        samples_per_pixel,
+    );
     camera.render(&world, &mut writer)?;
     Ok(())
-
-
 }

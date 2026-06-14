@@ -1,14 +1,14 @@
-use std::io::Write;
 use crate::interval::Interval;
 use crate::vec3::Vec3;
+use std::io::Write;
 
 pub type Color = Vec3;
-pub fn print_color(color: &Color,buffer:&mut impl Write) {
+pub fn print_color(color: &Color, buffer: &mut impl Write) {
     let r = color.x();
     let g = color.y();
     let b = color.z();
-    
-    let intensity = Interval::new(0.0,0.999);
+
+    let intensity = Interval::new(0.0, 0.999);
 
     let ir = (255.999 * intensity.clamp(r)) as i32;
     let ig = (255.999 * intensity.clamp(g)) as i32;
