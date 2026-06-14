@@ -60,6 +60,30 @@ impl Material for Metal {
         }else{
             None
         }
-
+    }
+}
+pub struct Dielectric {
+    pub refractive_index: f64,
+}
+impl Dielectric {
+    pub fn new(index: f64) -> Self {
+        Self { refractive_index: index }
+    }
+}
+impl Material for Dielectric {
+    fn scatter(&self, rin: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
+        let attenuation = Color::new(1.0, 1.0, 1.0);
+        let ri = if record.front_face {
+            1.0/self.refractive_index
+        }else{
+            self.refractive_index
+        };
+        let unit_direction = rin.direction().unit_vector();
+        let refracted = unit_direction.refract(record.normal, ri);
+        let scattered = Ray::new(record.p, refracted);
+        Some(ScatteredRecord{
+            attenuation,
+            scattered,
+        })
     }
 }

@@ -9,6 +9,7 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub t: f64,
     pub mat: Arc<dyn Material>,
+    pub front_face: bool,
 }
 pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, t: Interval) -> Option<HitRecord> {

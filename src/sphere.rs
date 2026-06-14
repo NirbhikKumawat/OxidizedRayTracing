@@ -40,10 +40,12 @@ impl Hittable for Sphere {
         let t = root;
         let p = ray.point_at(t);
         let mut normal = (p - self.center) / self.radius;
+        let mut front_face = true;
         if normal.dot(ray.direction()) >= 0.0 {
             normal = -normal;
+            front_face = false;
         }
         let mat = Arc::clone(&self.mat);
-        Some(HitRecord { t, p, normal, mat })
+        Some(HitRecord { t, p, normal, mat,front_face })
     }
 }
