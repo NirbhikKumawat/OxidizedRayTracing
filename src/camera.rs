@@ -96,8 +96,10 @@ fn ray_color(ray: &Ray, world: &HittableList, depth: u32) -> Color {
         return Color::new(0.0, 0.0, 0.0);
     }
     if let Some(record) = world.hit(ray, Interval::new(0.001, INFINITY)) {
-        let direction = record.normal + Vec3::random_on_hemisphere(record.normal);
-        return 0.5 * ray_color(&Ray::new(record.p, direction), world, depth - 1);
+        if let Some(scat) = record.mat.scatter(ray, &record) {
+            return scat.attenuation * ray_color(&scat.scattered, world, depth - 1);
+        }
+        return Color::new(0.0, 0.0, 0.0);
     }
     let unit_direction = ray.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);

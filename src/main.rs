@@ -1,10 +1,13 @@
 use OxidisedRayTracing::camera::Camera;
+use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
+use OxidisedRayTracing::material::{Lambertian, Metal};
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::vec3::Point3;
 use std::env;
 use std::fs::File;
 use std::io::BufWriter;
+use std::sync::Arc;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -24,10 +27,31 @@ fn main() -> std::io::Result<()> {
     let max_depth = 50;
 
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(Point3::new(0f64, 0f64, -1f64), 0.5)));
+
+    let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+    let material_left = Arc::new(Metal::new(Color::new(0.8, 0.8, 0.8)));
+    let material_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2)));
+
     world.add(Box::new(Sphere::new(
-        Point3::new(0f64, -100.5, -1f64),
+        Point3::new(0.0, -100.5, -1.0),
         100.0,
+        material_ground,
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.2),
+        0.5,
+        material_center,
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left,
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        material_right,
     )));
 
     let camera = Camera::new(
