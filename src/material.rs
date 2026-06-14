@@ -52,9 +52,14 @@ impl Material for Metal {
         let reflected = reflected.unit_vector() + (self.fuzz * Vec3::random_unit_vector());
         let scattered = Ray::new(record.p, reflected);
         let attenuation = self.albedo;
-        Some(ScatteredRecord {
-            attenuation,
-            scattered,
-        })
+        if scattered.direction().dot(record.normal) > 0.0 {
+            Some(ScatteredRecord {
+                attenuation,
+                scattered,
+            })
+        }else{
+            None
+        }
+
     }
 }
