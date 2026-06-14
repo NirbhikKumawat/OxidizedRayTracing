@@ -3,7 +3,7 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
-#[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vec3 {
     e: [f64; 3],
 }
@@ -97,6 +97,20 @@ impl Vec3 {
         let r_parallel = (1.0 - r_perp.length_squared()).abs().sqrt();
         let r_parallel = -r_parallel * normal;
         r_parallel + r_perp
+    }
+    #[inline]
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+}
+impl Default for Vec3 {
+    fn default() -> Self {
+        Self { e: [0.0, 0.0, 0.0] }
     }
 }
 impl Add for Vec3 {

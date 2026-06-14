@@ -24,9 +24,11 @@ fn main() -> std::io::Result<()> {
     let samples_per_pixel = 100;
     let max_depth = 50;
     let vfov = 20.0;
-    let look_from = Point3::new(-2.0,2.0,1.0);
+    let look_from = Point3::new(-2.0, 2.0, 1.0);
     let look_at = Point3::new(0.0, 0.0, -1.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 10.0;
+    let focus_dist = 3.4;
 
     let mut world = HittableList::new();
 
@@ -62,7 +64,7 @@ fn main() -> std::io::Result<()> {
         material_right,
     )));
 
-    let camera = Camera::new(
+    let camera = Camera::new_with_defocus(
         aspect_ratio,
         image_width,
         samples_per_pixel,
@@ -70,7 +72,9 @@ fn main() -> std::io::Result<()> {
         vfov,
         look_from,
         look_at,
-        vup
+        vup,
+        defocus_angle,
+        focus_dist,
     );
     camera.render(&world, &mut writer)?;
     Ok(())
