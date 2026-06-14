@@ -30,7 +30,8 @@ fn main() -> std::io::Result<()> {
 
     let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
     let material_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let material_left = Arc::new(Dielectric::new(1.00 / 1.33));
+    let material_left = Arc::new(Dielectric::new(1.5));
+    let material_bubble = Arc::new(Dielectric::new(1.0 / 1.50));
     let material_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
 
     world.add(Box::new(Sphere::new(
@@ -47,6 +48,11 @@ fn main() -> std::io::Result<()> {
         Point3::new(-1.0, 0.0, -1.0),
         0.5,
         material_left,
+    )));
+    world.add(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.4,
+        material_bubble,
     )));
     world.add(Box::new(Sphere::new(
         Point3::new(1.0, 0.0, -1.0),

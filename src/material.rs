@@ -1,6 +1,7 @@
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::utility::random_f64;
 use crate::vec3::Vec3;
 
 pub struct ScatteredRecord {
@@ -71,6 +72,10 @@ impl Dielectric {
             refractive_index: index,
         }
     }
+    fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
+        let r0 = ((1.0 - ref_idx) / (1.0 + ref_idx)).powi(2);
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
+    }
 }
 impl Material for Dielectric {
     fn scatter(&self, rin: &Ray, record: &HitRecord) -> Option<ScatteredRecord> {
@@ -84,7 +89,7 @@ impl Material for Dielectric {
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
         let cannot_refract = ri * sin_theta > 1.0;
         let unit_direction = rin.direction().unit_vector();
-        let direction = if cannot_refract {
+        let direction = if cannot_refract || Self::reflectance(cos_theta, ri) > random_f64() {
             unit_direction.reflect(record.normal)
         } else {
             unit_direction.refract(record.normal, ri)
