@@ -96,7 +96,7 @@ fn ray_color(ray: &Ray, world: &HittableList, depth: u32) -> Color {
         return Color::new(0.0, 0.0, 0.0);
     }
     if let Some(record) = world.hit(ray, Interval::new(0.001, INFINITY)) {
-        let direction = Vec3::random_on_hemisphere(record.normal);
+        let direction = record.normal+Vec3::random_on_hemisphere(record.normal);
         return 0.5 * ray_color(&Ray::new(record.p, direction), world, depth - 1);
     }
     let unit_direction = ray.direction().unit_vector();
