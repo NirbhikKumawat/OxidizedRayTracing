@@ -8,7 +8,6 @@ use crate::vec3::{Point3, Vec3};
 use std::io::Write;
 
 pub struct Camera {
-    aspect_ratio: f64,
     image_width: u32,
     image_height: u32,
     center: Point3,
@@ -22,7 +21,6 @@ pub struct Camera {
     defocus_disk_u: Vec3,
     defocus_disk_v: Vec3,
     defocus_angle: f64,
-    defocus_dist: f64,
 }
 impl Camera {
     pub fn new(
@@ -65,7 +63,6 @@ impl Camera {
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
         let defocus = false;
         Self {
-            aspect_ratio,
             image_width,
             image_height,
             center,
@@ -79,7 +76,6 @@ impl Camera {
             defocus_disk_u: Vec3::default(),
             defocus_disk_v: Vec3::default(),
             defocus_angle: 0.0,
-            defocus_dist: 0.0,
         }
     }
     pub fn new_with_defocus(
@@ -128,7 +124,6 @@ impl Camera {
         let defocus_disk_v = defocus_radius * v;
 
         Self {
-            aspect_ratio,
             image_width,
             image_height,
             center,
@@ -142,7 +137,6 @@ impl Camera {
             defocus_disk_u,
             defocus_disk_v,
             defocus_angle,
-            defocus_dist,
         }
     }
     pub fn render(&self, world: &HittableList, writer: &mut impl Write) -> std::io::Result<()> {

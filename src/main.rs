@@ -21,7 +21,7 @@ fn main() -> std::io::Result<()> {
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 10;
     let max_depth = 50;
     let vfov = 20.0;
     let look_from = Point3::new(-2.0, 2.0, 1.0);
