@@ -21,6 +21,7 @@ fn main() -> std::io::Result<()> {
     let viewport_height = 2.0;
     let focal_length = 1.0;
     let samples_per_pixel = 10;
+    let max_depth = 50;
 
     let mut world = HittableList::new();
     world.add(Box::new(Sphere::new(Point3::new(0f64, 0f64, -1f64), 0.5)));
@@ -36,6 +37,7 @@ fn main() -> std::io::Result<()> {
         viewport_height,
         focal_length,
         samples_per_pixel,
+        max_depth,
     );
     camera.render(&world, &mut writer)?;
     Ok(())

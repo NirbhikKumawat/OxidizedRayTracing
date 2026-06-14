@@ -17,6 +17,7 @@ pub struct Camera {
     pixel_data_v: Vec3,
     pixel_samples_scale: f64,
     samples_per_pixel: u32,
+    max_depth: u32,
 }
 impl Camera {
     pub fn new(
@@ -26,6 +27,7 @@ impl Camera {
         viewport_height: f64,
         focal_length: f64,
         samples_per_pixel: u32,
+        max_depth: u32,
     ) -> Self {
         let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         if image_height < 1 {
@@ -55,6 +57,7 @@ impl Camera {
             pixel00_loc,
             pixel_samples_scale,
             samples_per_pixel,
+            max_depth,
         }
     }
     pub fn render(&self, world: &HittableList, writer: &mut impl Write) -> std::io::Result<()> {
@@ -69,7 +72,7 @@ impl Camera {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += ray_color(&r, world);
+                    pixel_color += ray_color(&r, world, self.max_depth);
                 }
                 pixel_color *= self.pixel_samples_scale;
                 print_color(&pixel_color, writer);
@@ -88,10 +91,13 @@ impl Camera {
         Ray::new(ray_origin, ray_direction)
     }
 }
-fn ray_color(ray: &Ray, world: &HittableList) -> Color {
+fn ray_color(ray: &Ray, world: &HittableList, depth: u32) -> Color {
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
     if let Some(record) = world.hit(ray, Interval::new(0.0, INFINITY)) {
         let direction = Vec3::random_on_hemisphere(record.normal);
-        return 0.5 * ray_color(&Ray::new(record.p, direction), world);
+        return 0.5 * ray_color(&Ray::new(record.p, direction), world, depth - 1);
     }
     let unit_direction = ray.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
