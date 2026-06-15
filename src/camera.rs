@@ -171,7 +171,8 @@ impl Camera {
             self.center
         };
         let ray_direction = pixel_sample - ray_origin;
-        Ray::new(ray_origin, ray_direction)
+        let ray_time = random_f64();
+        Ray::new_with_time(ray_origin, ray_direction, ray_time)
     }
     pub fn defocus_disk_sample(&self) -> Point3 {
         let p = Vec3::random_in_unit_disk();
