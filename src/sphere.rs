@@ -3,6 +3,7 @@ use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
+use crate::utility::PI;
 use crate::vec3::{Point3, Vec3};
 use std::sync::Arc;
 
@@ -76,6 +77,7 @@ impl Hittable for Sphere {
             normal = -normal;
             front_face = false;
         }
+        let (u, v) = get_sphere_uv(&normal);
         let mat = Arc::clone(&self.mat);
         Some(HitRecord {
             t,
@@ -83,11 +85,18 @@ impl Hittable for Sphere {
             normal,
             mat,
             front_face,
-            u: 0.0,
-            v: 0.0,
+            u,
+            v,
         })
     }
     fn bounding_box(&self) -> Aabb {
         self.bbox
     }
+}
+pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
+    let theta = (-p.y()).acos();
+    let phi = (-p.z()).atan2(p.x()) + PI;
+    let u = phi / (2.0 * PI);
+    let v = theta / PI;
+    (u, v)
 }

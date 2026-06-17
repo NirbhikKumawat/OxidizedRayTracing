@@ -12,27 +12,7 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::sync::Arc;
 
-fn main() -> std::io::Result<()> {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("Usage: {} <filename>", args[0]);
-        std::process::exit(1);
-    }
-    let filename = &args[1];
-    let file = File::create(filename)?;
-    let mut writer = BufWriter::new(file);
-
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
-    let vfov = 20.0;
-    let look_from = Point3::new(13.0, 2.0, 3.0);
-    let look_at = Point3::new(0.0, 0.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-    let defocus_angle = 0.6;
-    let focus_dist = 10.0;
-
+fn bouncing_spheres() -> HittableList {
     let mut world = HittableList::new();
     let checker = Arc::new(CheckerTexture::from_colors(
         0.32,
@@ -104,6 +84,54 @@ fn main() -> std::io::Result<()> {
     let bvh = BvhNode::new_from_hittable(world);
     let mut world = HittableList::new();
     world.add(Arc::new(bvh));
+    world
+}
+fn checkered_spheres() -> HittableList {
+    let mut world = HittableList::new();
+
+    let checker = Arc::new(CheckerTexture::from_colors(
+        0.32,
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ));
+    let material = Arc::new(Lambertian::new_from_texture(checker));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -10.0, 0.0),
+        10.0,
+        material.clone(),
+    )));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 10.0, 0.0),
+        10.0,
+        material,
+    )));
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
+fn main() -> std::io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        eprintln!("Usage: {} <filename>", args[0]);
+        std::process::exit(1);
+    }
+    let filename = &args[1];
+    let file = File::create(filename)?;
+    let mut writer = BufWriter::new(file);
+
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point3::new(13.0, 2.0, 3.0);
+    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.6;
+    let focus_dist = 10.0;
+
+    let world = checkered_spheres();
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,
