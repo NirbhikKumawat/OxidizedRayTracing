@@ -9,6 +9,7 @@ use std::env;
 use std::fs::File;
 use std::io::BufWriter;
 use std::sync::Arc;
+use OxidisedRayTracing::bvh::BvhNode;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -23,7 +24,7 @@ fn main() -> std::io::Result<()> {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let samples_per_pixel = 100;
-    let max_depth = 5;
+    let max_depth = 50;
     let vfov = 20.0;
     let look_from = Point3::new(13.0, 2.0, 3.0);
     let look_at = Point3::new(0.0, 0.0, 0.0);
@@ -34,7 +35,7 @@ fn main() -> std::io::Result<()> {
     let mut world = HittableList::new();
 
     let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
-    world.add(Box::new(Sphere::new(
+    world.add(Arc::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
         material_ground,
@@ -54,7 +55,7 @@ fn main() -> std::io::Result<()> {
                         Color::random_vector() * Color::random_vector(),
                     ));
                     let center2 = center + Vec3::new(0.0, random_f64(), 0.0);
-                    world.add(Box::new(Sphere::new_moving(
+                    world.add(Arc::new(Sphere::new_moving(
                         center,
                         center2,
                         0.2,
@@ -65,35 +66,41 @@ fn main() -> std::io::Result<()> {
                         Color::random_vector3(0.5, 1.0),
                         random_double(0.0, 0.5),
                     ));
-                    world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                    world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
                 } else {
                     let sphere_material = Arc::new(Dielectric::new(1.5));
-                    world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                    world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
                 }
             }
         }
     }
 
     let material_left = Arc::new(Dielectric::new(1.5));
-    world.add(Box::new(Sphere::new(
+    world.add(Arc::new(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
         material_left,
     )));
 
     let material_center = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
-    world.add(Box::new(Sphere::new(
+    world.add(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
         material_center,
     )));
 
     let material_right = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.1));
-    world.add(Box::new(Sphere::new(
+    world.add(Arc::new(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
         material_right,
     )));
+
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+
+
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,

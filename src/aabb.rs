@@ -1,4 +1,4 @@
-use crate::interval::Interval;
+use crate::interval::{Interval, EMPTY};
 use crate::ray::Ray;
 use crate::vec3::Point3;
 
@@ -7,6 +7,15 @@ pub struct Aabb {
     x: Interval,
     y: Interval,
     z: Interval,
+}
+impl Default for Aabb {
+    fn default() -> Self {
+        Self{
+            x: EMPTY,
+            y: EMPTY,
+            z: EMPTY
+        }
+    }
 }
 impl Aabb {
     pub fn new(x: Interval, y: Interval, z: Interval) -> Self {
@@ -75,5 +84,20 @@ impl Aabb {
             }
         }
         true
+    }
+    pub fn longest_axis(&self) -> u8 {
+        if self.x.size() > self.y.size() {
+            if self.x.size() > self.z.size() {
+                0
+            }else{
+                2
+            }
+        }else{
+            if self.y.size() > self.z.size() {
+                1
+            }else{
+                2
+            }
+        }
     }
 }
