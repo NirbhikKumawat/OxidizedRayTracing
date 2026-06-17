@@ -1,15 +1,16 @@
+use OxidisedRayTracing::bvh::BvhNode;
 use OxidisedRayTracing::camera::Camera;
 use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
 use OxidisedRayTracing::sphere::Sphere;
+use OxidisedRayTracing::texture::CheckerTexture;
 use OxidisedRayTracing::utility::{random_double, random_f64};
 use OxidisedRayTracing::vec3::{Point3, Vec3};
 use std::env;
 use std::fs::File;
 use std::io::BufWriter;
 use std::sync::Arc;
-use OxidisedRayTracing::bvh::BvhNode;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -33,8 +34,12 @@ fn main() -> std::io::Result<()> {
     let focus_dist = 10.0;
 
     let mut world = HittableList::new();
-
-    let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let checker = Arc::new(CheckerTexture::from_colors(
+        0.32,
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ));
+    let material_ground = Arc::new(Lambertian::new_from_texture(checker));
     world.add(Arc::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
@@ -52,7 +57,7 @@ fn main() -> std::io::Result<()> {
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 if choose_mat < 0.8 {
                     let sphere_material = Arc::new(Lambertian::new(
-                        Color::random_vector() * Color::random_vector(),
+                        &(Color::random_vector() * Color::random_vector()),
                     ));
                     let center2 = center + Vec3::new(0.0, random_f64(), 0.0);
                     world.add(Arc::new(Sphere::new_moving(
@@ -82,7 +87,7 @@ fn main() -> std::io::Result<()> {
         material_left,
     )));
 
-    let material_center = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    let material_center = Arc::new(Lambertian::new(&Color::new(0.4, 0.2, 0.1)));
     world.add(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
@@ -99,8 +104,6 @@ fn main() -> std::io::Result<()> {
     let bvh = BvhNode::new_from_hittable(world);
     let mut world = HittableList::new();
     world.add(Arc::new(bvh));
-
-
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,

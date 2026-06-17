@@ -1,8 +1,10 @@
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::texture::{SolidColor, Texture};
 use crate::utility::random_f64;
 use crate::vec3::Vec3;
+use std::sync::Arc;
 
 pub struct ScatteredRecord {
     pub attenuation: Color,
@@ -14,11 +16,15 @@ pub trait Material: Send + Sync {
     }
 }
 pub struct Lambertian {
-    pub albedo: Color,
+    tex: Arc<dyn Texture>,
 }
 impl Lambertian {
-    pub fn new(albedo: Color) -> Self {
-        Self { albedo }
+    pub fn new(albedo: &Color) -> Self {
+        let tex = Arc::new(SolidColor::new(albedo.clone()));
+        Self { tex }
+    }
+    pub fn new_from_texture(tex: Arc<dyn Texture>) -> Self {
+        Self { tex }
     }
 }
 impl Material for Lambertian {
@@ -28,7 +34,7 @@ impl Material for Lambertian {
             scatter_direction = record.normal;
         }
         let scattered = Ray::new_with_time(record.p, scatter_direction, ray.time());
-        let attenuation = self.albedo;
+        let attenuation = self.tex.value(record.u, record.v, &record.p);
         Some(ScatteredRecord {
             attenuation,
             scattered,

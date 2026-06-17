@@ -1,10 +1,10 @@
+use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 use std::sync::Arc;
-use crate::aabb::Aabb;
 
 pub struct Sphere {
     pub center: Ray,
@@ -14,13 +14,13 @@ pub struct Sphere {
 }
 impl Sphere {
     pub fn new(center: Point3, radius: f64, mat: Arc<dyn Material>) -> Self {
-        let rvec = radius*Vec3::new(1.0,1.0,1.0);
+        let rvec = radius * Vec3::new(1.0, 1.0, 1.0);
         let bbox = Aabb::new_from_points(&(center - rvec), &(center + rvec));
         Self {
             center: Ray::new(center, Vec3::default()),
             radius,
             mat,
-            bbox
+            bbox,
         }
     }
 
@@ -30,16 +30,22 @@ impl Sphere {
         radius: f64,
         mat: Arc<dyn Material>,
     ) -> Self {
-        let rvec = radius*Vec3::new(1.0,1.0,1.0);
-        let center =  Ray::new(center1, center2 - center1);
-        let box1 = Aabb::new_from_points(&(center.point_at(0.0) - rvec), &(center.point_at(0.0) + rvec));
-        let box2 = Aabb::new_from_points(&(center.point_at(1.0) - rvec), &(center.point_at(1.0) + rvec));
+        let rvec = radius * Vec3::new(1.0, 1.0, 1.0);
+        let center = Ray::new(center1, center2 - center1);
+        let box1 = Aabb::new_from_points(
+            &(center.point_at(0.0) - rvec),
+            &(center.point_at(0.0) + rvec),
+        );
+        let box2 = Aabb::new_from_points(
+            &(center.point_at(1.0) - rvec),
+            &(center.point_at(1.0) + rvec),
+        );
         let bbox = Aabb::new_from_boxes(&box1, &box2);
         Self {
             center,
             radius,
             mat,
-            bbox
+            bbox,
         }
     }
 }
@@ -77,6 +83,8 @@ impl Hittable for Sphere {
             normal,
             mat,
             front_face,
+            u: 0.0,
+            v: 0.0,
         })
     }
     fn bounding_box(&self) -> Aabb {
