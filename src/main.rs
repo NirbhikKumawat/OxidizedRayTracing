@@ -4,7 +4,7 @@ use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
 use OxidisedRayTracing::sphere::Sphere;
-use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture};
+use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use OxidisedRayTracing::utility::{random_double, random_f64};
 use OxidisedRayTracing::vec3::{Point3, Vec3};
 use std::env;
@@ -121,6 +121,17 @@ fn checkered_spheres() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
+fn perlin_spheres() -> HittableList {
+    let mut world = HittableList::new();
+    let pertext = Arc::new(NoiseTexture::<256>::new());
+    let pertext = Arc::new(Lambertian::new_from_texture(pertext));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, pertext.clone())));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, 2.0, 0.0), 2.0, pertext)));
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -142,7 +153,7 @@ fn main() -> std::io::Result<()> {
     let defocus_angle = 0.6;
     let focus_dist = 10.0;
 
-    let world = earth();
+    let world = perlin_spheres();
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,
