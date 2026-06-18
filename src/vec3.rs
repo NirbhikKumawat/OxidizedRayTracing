@@ -222,7 +222,6 @@ impl IndexMut<usize> for Vec3 {
     }
 }
 
-
 impl Mul<f64> for &Point3 {
     type Output = Point3;
 

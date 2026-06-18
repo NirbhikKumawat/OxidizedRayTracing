@@ -1,9 +1,9 @@
 use crate::color::Color;
 use crate::img::RtwImage;
 use crate::interval::Interval;
-use crate::vec3::{Point3};
-use std::sync::Arc;
 use crate::perlin::Perlin;
+use crate::vec3::Point3;
+use std::sync::Arc;
 
 pub trait Texture: Send + Sync {
     fn value(&self, _: f64, _: f64, _: &Point3) -> Color {
@@ -95,11 +95,11 @@ pub struct NoiseTexture<const N: usize> {
 impl<const N: usize> NoiseTexture<N> {
     pub fn new(scale: f64) -> Self {
         let noise = Perlin::new();
-        Self { noise , scale }
+        Self { noise, scale }
     }
 }
 impl<const N: usize> Texture for NoiseTexture<N> {
     fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
-        Color::new(1.0, 1.0, 1.0)*self.noise.noise(&(p * self.scale))
+        Color::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + self.noise.noise(&(p * self.scale)))
     }
 }
