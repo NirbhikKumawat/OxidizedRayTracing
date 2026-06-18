@@ -1,4 +1,4 @@
-use crate::utility::{random_int};
+use crate::utility::random_int;
 use crate::vec3::{Point3, Vec3};
 
 pub struct Perlin<const N: usize> {
@@ -76,5 +76,17 @@ impl<const N: usize> Perlin<N> {
             }
         }
         accum
+    }
+    pub fn turb(&self, p: &Point3, depth: i32) -> f64 {
+        let mut accum = 0.0;
+        let mut temp_p = p.clone();
+        let mut weight = 1.0;
+
+        for _ in 0..depth {
+            accum += weight * self.noise(&temp_p);
+            weight *= 0.5;
+            temp_p = temp_p * 2.0;
+        }
+        accum.abs()
     }
 }
