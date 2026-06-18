@@ -43,7 +43,9 @@ impl<const N: usize> Perlin<N> {
                     let x = ((i + di as i32) & 255) as usize;
                     let y = ((j + dj as i32) & 255) as usize;
                     let z = ((k + dk as i32) & 255) as usize;
-                    c[di][dj][dk] = self.rand_float[x^y^z];
+                    let perm_idx = self.perm_x[x] ^ self.perm_y[y] ^ self.perm_z[z];
+
+                    c[di][dj][dk] = self.rand_float[perm_idx];
                 }
             }
         }

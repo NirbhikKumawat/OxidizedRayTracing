@@ -90,15 +90,16 @@ impl Texture for ImageTexture {
 }
 pub struct NoiseTexture<const N: usize> {
     noise: Perlin<N>,
+    scale: f64,
 }
 impl<const N: usize> NoiseTexture<N> {
-    pub fn new() -> Self {
+    pub fn new(scale: f64) -> Self {
         let noise = Perlin::new();
-        Self { noise }
+        Self { noise , scale }
     }
 }
 impl<const N: usize> Texture for NoiseTexture<N> {
     fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
-        Color::new(1.0, 1.0, 1.0)*self.noise.noise(p)
+        Color::new(1.0, 1.0, 1.0)*self.noise.noise(&(p * self.scale))
     }
 }

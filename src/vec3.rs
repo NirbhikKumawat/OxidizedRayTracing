@@ -221,3 +221,12 @@ impl IndexMut<usize> for Vec3 {
         &mut self.e[index]
     }
 }
+
+
+impl Mul<f64> for &Point3 {
+    type Output = Point3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        rhs * *self
+    }
+}

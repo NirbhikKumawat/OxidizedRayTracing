@@ -123,7 +123,7 @@ fn checkered_spheres() -> HittableList {
 }
 fn perlin_spheres() -> HittableList {
     let mut world = HittableList::new();
-    let pertext = Arc::new(NoiseTexture::<256>::new());
+    let pertext = Arc::new(NoiseTexture::<256>::new(4.0));
     let pertext = Arc::new(Lambertian::new_from_texture(pertext));
     world.add(Arc::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, pertext.clone())));
     world.add(Arc::new(Sphere::new(Point3::new(0.0, 2.0, 0.0), 2.0, pertext)));
