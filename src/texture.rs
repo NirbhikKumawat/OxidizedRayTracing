@@ -1,9 +1,11 @@
 use crate::color::Color;
-use crate::vec3::{Point3, Vec3};
+use crate::img::RtwImage;
+use crate::interval::Interval;
+use crate::vec3::{Point3};
 use std::sync::Arc;
 
 pub trait Texture: Send + Sync {
-    fn value(&self, _: f64, _: f64, _: &Point3) -> Vec3 {
+    fn value(&self, _: f64, _: f64, _: &Point3) -> Color {
         Color::new(0.0, 0.0, 0.0)
     }
 }
@@ -20,7 +22,7 @@ impl SolidColor {
     }
 }
 impl Texture for SolidColor {
-    fn value(&self, _: f64, _: f64, _: &Point3) -> Vec3 {
+    fn value(&self, _: f64, _: f64, _: &Point3) -> Color {
         self.albedo
     }
 }
@@ -47,7 +49,7 @@ impl CheckerTexture {
     }
 }
 impl Texture for CheckerTexture {
-    fn value(&self, u: f64, v: f64, p: &Point3) -> Vec3 {
+    fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
         let x = (self.inv_scale * p.x()).floor() as i32;
         let y = (self.inv_scale * p.y()).floor() as i32;
         let z = (self.inv_scale * p.z()).floor() as i32;
@@ -57,5 +59,31 @@ impl Texture for CheckerTexture {
         } else {
             self.odd.value(u, v, p)
         }
+    }
+}
+pub struct ImageTexture {
+    image: RtwImage,
+}
+impl ImageTexture {
+    pub fn new(filename: &str) -> Self {
+        Self {
+            image: RtwImage::new(filename),
+        }
+    }
+}
+impl Texture for ImageTexture {
+    fn value(&self, u: f64, v: f64, _: &Point3) -> Color {
+        if self.image.height() == 0 {
+            return Color::new(0.0, 1.0, 1.0);
+        }
+        let u = Interval::new(0.0, 1.0).clamp(u);
+        let v = 1.0 - Interval::new(0.0, 1.0).clamp(v);
+
+        let i = (u * self.image.width() as f64) as i32;
+        let j = (v * self.image.height() as f64) as i32;
+
+        let pixel = self.image.pixel_data(i, j);
+        let color_scale = 1.0 / 255.0;
+        color_scale * Color::new(pixel[0] as f64, pixel[1] as f64, pixel[2] as f64)
     }
 }

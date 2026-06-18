@@ -4,7 +4,7 @@ use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
 use OxidisedRayTracing::sphere::Sphere;
-use OxidisedRayTracing::texture::CheckerTexture;
+use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture};
 use OxidisedRayTracing::utility::{random_double, random_f64};
 use OxidisedRayTracing::vec3::{Point3, Vec3};
 use std::env;
@@ -86,6 +86,17 @@ fn bouncing_spheres() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
+fn earth() -> HittableList {
+    let mut world = HittableList::new();
+    let earth_texture = Arc::new(ImageTexture::new("./textures/earthmap.jpg"));
+    let earth_surface = Arc::new(Lambertian::new_from_texture(earth_texture));
+    let globe = Arc::new(Sphere::new(Point3::new(0.0, 0.0, 0.0), 2.0, earth_surface));
+    world.add(globe);
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
 fn checkered_spheres() -> HittableList {
     let mut world = HittableList::new();
 
@@ -131,7 +142,7 @@ fn main() -> std::io::Result<()> {
     let defocus_angle = 0.6;
     let focus_dist = 10.0;
 
-    let world = checkered_spheres();
+    let world = earth();
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,
