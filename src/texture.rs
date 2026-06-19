@@ -100,6 +100,7 @@ impl<const N: usize> NoiseTexture<N> {
 }
 impl<const N: usize> Texture for NoiseTexture<N> {
     fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
-        Color::new(0.5, 0.5, 0.5) * (1.0+(self.scale*p.z() + 10.0* self.noise.turb(p, 7)).sin())
+        Color::new(0.5, 0.5, 0.5)
+            * (1.0 + (self.scale * p.z() + 10.0 * self.noise.turb(p, 7)).sin())
     }
 }

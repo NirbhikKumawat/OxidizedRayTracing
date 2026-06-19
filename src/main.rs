@@ -3,6 +3,7 @@ use OxidisedRayTracing::camera::Camera;
 use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
+use OxidisedRayTracing::quad::Quad;
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use OxidisedRayTracing::utility::{random_double, random_f64};
@@ -12,7 +13,6 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::sync::Arc;
 use std::time::Instant;
-use OxidisedRayTracing::quad::Quad;
 
 fn bouncing_spheres() -> HittableList {
     let mut world = HittableList::new();
@@ -150,17 +150,41 @@ fn quads() -> HittableList {
     let upper_orange = Arc::new(Lambertian::new(&Color::new(1.0, 0.5, 0.0)));
     let lower_teal = Arc::new(Lambertian::new(&Color::new(0.2, 0.8, 0.8)));
 
-    world.add(Arc::new(Quad::new(Point3::new(-3.0,-2.0,5.0),Vec3::new(0.0,0.0,-4.0),Vec3::new(0.0,4.0,0.0),left_red)));
-    world.add(Arc::new(Quad::new(Point3::new(-2.0,-2.0,0.0),Vec3::new(4.0,0.0,0.0),Vec3::new(0.0,4.0,0.0),back_green)));
-    world.add(Arc::new(Quad::new(Point3::new(3.0,-2.0,1.0),Vec3::new(0.0,0.0,4.0),Vec3::new(0.0,4.0,0.0),right_blue)));
-    world.add(Arc::new(Quad::new(Point3::new(-2.0,3.0,1.0),Vec3::new(4.0,0.0,0.0),Vec3::new(0.0,0.0,4.0),upper_orange)));
-    world.add(Arc::new(Quad::new(Point3::new(-2.0,-3.0,5.0),Vec3::new(4.0,0.0,0.0),Vec3::new(0.0,0.0,-4.0),lower_teal)));
+    world.add(Arc::new(Quad::new(
+        Point3::new(-3.0, -2.0, 5.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        left_red,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(-2.0, -2.0, 0.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        back_green,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(3.0, -2.0, 1.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        right_blue,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(-2.0, 3.0, 1.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        upper_orange,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(-2.0, -3.0, 5.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        lower_teal,
+    )));
 
     let bvh = BvhNode::new_from_hittable(world);
     let mut world = HittableList::new();
     world.add(Arc::new(bvh));
     world
-
 }
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -182,8 +206,9 @@ fn main() -> std::io::Result<()> {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let defocus_angle = 0.6;
     let focus_dist = 10.0;
+    let background = Color::new(0.7, 0.8, 1.0);
 
-    let world = bouncing_spheres();
+    let world = quads();
 
     let camera = Camera::new_with_defocus(
         aspect_ratio,
@@ -196,6 +221,7 @@ fn main() -> std::io::Result<()> {
         vup,
         defocus_angle,
         focus_dist,
+        background,
     );
     let start_time = Instant::now();
     camera.render(&world, &mut writer)?;

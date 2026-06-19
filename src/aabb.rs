@@ -102,7 +102,7 @@ impl Aabb {
             if self.y.size() > self.z.size() { 1 } else { 2 }
         }
     }
-    fn pad_to_minimums(interval: &mut Interval){
+    fn pad_to_minimums(interval: &mut Interval) {
         let delta = 0.0001;
         if interval.size() < delta {
             *interval = interval.expand(delta);

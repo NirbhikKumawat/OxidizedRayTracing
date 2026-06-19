@@ -21,6 +21,7 @@ pub struct Camera {
     defocus_disk_u: Vec3,
     defocus_disk_v: Vec3,
     defocus_angle: f64,
+    background: Color,
 }
 impl Camera {
     pub fn new(
@@ -32,6 +33,7 @@ impl Camera {
         look_from: Point3,
         look_at: Point3,
         vup: Vec3,
+        background: Color,
     ) -> Self {
         let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         if image_height < 1 {
@@ -76,6 +78,7 @@ impl Camera {
             defocus_disk_u: Vec3::default(),
             defocus_disk_v: Vec3::default(),
             defocus_angle: 0.0,
+            background,
         }
     }
     pub fn new_with_defocus(
@@ -89,6 +92,7 @@ impl Camera {
         vup: Vec3,
         defocus_angle: f64,
         defocus_dist: f64,
+        background: Color,
     ) -> Self {
         let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         if image_height < 1 {
@@ -137,6 +141,7 @@ impl Camera {
             defocus_disk_u,
             defocus_disk_v,
             defocus_angle,
+            background,
         }
     }
     pub fn render(&self, world: &HittableList, writer: &mut impl Write) -> std::io::Result<()> {
@@ -151,7 +156,7 @@ impl Camera {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += ray_color(&r, world, self.max_depth);
+                    pixel_color += self.ray_color(&r, world, self.max_depth);
                 }
                 pixel_color *= self.pixel_samples_scale;
                 print_color(&pixel_color, writer);
@@ -178,21 +183,23 @@ impl Camera {
         let p = Vec3::random_in_unit_disk();
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
     }
-}
-fn ray_color(ray: &Ray, world: &HittableList, depth: u32) -> Color {
-    if depth <= 0 {
-        return Color::new(0.0, 0.0, 0.0);
-    }
-    if let Some(record) = world.hit(ray, Interval::new(0.001, INFINITY)) {
-        if let Some(scat) = record.mat.scatter(ray, &record) {
-            return scat.attenuation * ray_color(&scat.scattered, world, depth - 1);
+    fn ray_color(&self, ray: &Ray, world: &HittableList, depth: u32) -> Color {
+        if depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
         }
-        return Color::new(0.0, 0.0, 0.0);
+        if let Some(record) = world.hit(ray, Interval::new(0.001, INFINITY)) {
+            if let Some(scat) = record.mat.scatter(ray, &record) {
+                scat.attenuation * self.ray_color(&scat.scattered, world, depth - 1)
+                    + record.mat.emitted(record.u, record.v, &record.p)
+            } else {
+                record.mat.emitted(record.u, record.v, &record.p)
+            }
+        } else {
+            self.background
+        }
     }
-    let unit_direction = ray.direction().unit_vector();
-    let a = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - a) * Color::new(1f64, 1f64, 1f64) + a * Color::new(0.5, 0.7, 1f64)
 }
+
 fn sample_square() -> Vec3 {
     Vec3::new(random_f64() - 0.5, random_f64() - 0.5, 0.0)
 }
