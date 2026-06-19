@@ -18,33 +18,43 @@ impl Default for Aabb {
     }
 }
 impl Aabb {
-    pub fn new(x: Interval, y: Interval, z: Interval) -> Self {
+    pub fn new(mut x: Interval, mut y: Interval, mut z: Interval) -> Self {
+        Self::pad_to_minimums(&mut x);
+        Self::pad_to_minimums(&mut y);
+        Self::pad_to_minimums(&mut z);
         Self { x, y, z }
     }
     pub fn new_from_points(a: &Point3, b: &Point3) -> Self {
-        let x = if a[0] <= b[0] {
+        let mut x = if a[0] <= b[0] {
             Interval::new(a[0], b[0])
         } else {
             Interval::new(b[0], a[0])
         };
-        let y = if a[1] <= b[1] {
+        let mut y = if a[1] <= b[1] {
             Interval::new(a[1], b[1])
         } else {
             Interval::new(b[1], a[1])
         };
-        let z = if a[2] <= b[2] {
+        let mut z = if a[2] <= b[2] {
             Interval::new(a[2], b[2])
         } else {
             Interval::new(b[2], a[2])
         };
+        Self::pad_to_minimums(&mut x);
+        Self::pad_to_minimums(&mut y);
+        Self::pad_to_minimums(&mut z);
         Self { x, y, z }
     }
     pub fn new_from_boxes(box1: &Self, box2: &Self) -> Self {
-        Self {
-            x: Interval::new_from_intervals(&box1.x, &box2.x),
-            y: Interval::new_from_intervals(&box1.y, &box2.y),
-            z: Interval::new_from_intervals(&box1.z, &box2.z),
-        }
+        let mut x = Interval::new_from_intervals(&box1.x, &box2.x);
+        let mut y = Interval::new_from_intervals(&box1.y, &box2.y);
+        let mut z = Interval::new_from_intervals(&box1.z, &box2.z);
+
+        Self::pad_to_minimums(&mut x);
+        Self::pad_to_minimums(&mut y);
+        Self::pad_to_minimums(&mut z);
+
+        Self { x, y, z }
     }
     pub fn axis_interval(&self, axis: u8) -> Interval {
         match axis {
@@ -90,6 +100,12 @@ impl Aabb {
             if self.x.size() > self.z.size() { 0 } else { 2 }
         } else {
             if self.y.size() > self.z.size() { 1 } else { 2 }
+        }
+    }
+    fn pad_to_minimums(interval: &mut Interval){
+        let delta = 0.0001;
+        if interval.size() < delta {
+            *interval = interval.expand(delta);
         }
     }
 }
