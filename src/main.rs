@@ -217,6 +217,55 @@ fn simple_light() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
+fn cornell_box() -> HittableList {
+    let mut world = HittableList::new();
+    let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(Lambertian::new(&Color::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_from_color(&Color::new(15.0, 15.0, 15.0)));
+
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(343.0, 554.0, 332.0),
+        Vec3::new(-130.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -105.0),
+        light,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 555.0, 555.0),
+        Vec3::new(-555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white,
+    )));
+
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -227,19 +276,19 @@ fn main() -> std::io::Result<()> {
     let file = File::create(filename)?;
     let mut writer = BufWriter::new(file);
 
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
-    let samples_per_pixel = 100;
+    let aspect_ratio = 1.0;
+    let image_width = 600;
+    let samples_per_pixel = 200;
     let max_depth = 50;
-    let vfov = 20.0;
-    let look_from = Point3::new(26.0, 3.0, 6.0);
-    let look_at = Point3::new(0.0, 2.0, 0.0);
+    let vfov = 40.0;
+    let look_from = Point3::new(278.0, 278.0, -800.0);
+    let look_at = Point3::new(278.0, 278.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     //let defocus_angle = 0.6;
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = simple_light();
+    let world = cornell_box();
 
     let camera = Camera::new(
         aspect_ratio,
