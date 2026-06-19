@@ -2,7 +2,7 @@ use OxidisedRayTracing::bvh::BvhNode;
 use OxidisedRayTracing::camera::Camera;
 use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
-use OxidisedRayTracing::material::{Dielectric, Lambertian, Metal};
+use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::quad::Quad;
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
@@ -186,6 +186,37 @@ fn quads() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
+fn simple_light() -> HittableList {
+    let mut world = HittableList::new();
+    let pertext = Arc::new(NoiseTexture::<256>::new(4.0));
+    let pertext = Arc::new(Lambertian::new_from_texture(pertext));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        pertext.clone(),
+    )));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
+        pertext,
+    )));
+    let diff_light = Arc::new(DiffuseLight::new_from_color(&Color::new(4.0, 4.0, 4.0)));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 7.0, 0.0),
+        2.0,
+        diff_light.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(3.0, 1.0, -2.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        Vec3::new(0.0, 2.0, 0.0),
+        diff_light,
+    )));
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -196,21 +227,21 @@ fn main() -> std::io::Result<()> {
     let file = File::create(filename)?;
     let mut writer = BufWriter::new(file);
 
-    let aspect_ratio = 1.0;
+    let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    let vfov = 80.0;
-    let look_from = Point3::new(0.0, 0.0, 9.0);
-    let look_at = Point3::new(0.0, 0.0, 0.0);
+    let vfov = 20.0;
+    let look_from = Point3::new(26.0, 3.0, 6.0);
+    let look_at = Point3::new(0.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let defocus_angle = 0.6;
-    let focus_dist = 10.0;
-    let background = Color::new(0.7, 0.8, 1.0);
+    //let defocus_angle = 0.6;
+    //let focus_dist = 10.0;
+    let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = quads();
+    let world = simple_light();
 
-    let camera = Camera::new_with_defocus(
+    let camera = Camera::new(
         aspect_ratio,
         image_width,
         samples_per_pixel,
@@ -219,8 +250,6 @@ fn main() -> std::io::Result<()> {
         look_from,
         look_at,
         vup,
-        defocus_angle,
-        focus_dist,
         background,
     );
     let start_time = Instant::now();
