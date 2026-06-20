@@ -1,6 +1,7 @@
 use OxidisedRayTracing::bvh::BvhNode;
 use OxidisedRayTracing::camera::Camera;
 use OxidisedRayTracing::color::Color;
+use OxidisedRayTracing::constant_medium::ConstantMedium;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::quad::Quad;
@@ -285,6 +286,81 @@ fn cornell_box() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
+fn cornell_smoke() -> HittableList {
+    let mut world = HittableList::new();
+
+    let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(Lambertian::new(&Color::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_from_color(&Color::new(7.0, 7.0, 7.0)));
+
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(113.0, 554.0, 127.0),
+        Vec3::new(330.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 305.0),
+        light,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 555.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white.clone(),
+    )));
+
+    let box1 = Arc::new(Quad::cuboid(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
+        white.clone(),
+    ));
+    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
+    world.add(Arc::new(ConstantMedium::new_from_color(
+        box1,
+        0.01,
+        &Color::new(0.0, 0.0, 0.0),
+    )));
+    let box2 = Arc::new(Quad::cuboid(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
+        white.clone(),
+    ));
+    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
+    world.add(Arc::new(ConstantMedium::new_from_color(
+        box2,
+        0.01,
+        &Color::new(1.0, 1.0, 1.0),
+    )));
+
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -307,7 +383,7 @@ fn main() -> std::io::Result<()> {
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = cornell_box();
+    let world = cornell_smoke();
 
     let camera = Camera::new(
         aspect_ratio,
