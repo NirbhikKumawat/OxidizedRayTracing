@@ -1,3 +1,4 @@
+use crate::aabb::Aabb;
 use crate::utility::{random_double, random_f64};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
@@ -227,5 +228,11 @@ impl Mul<f64> for &Point3 {
 
     fn mul(self, rhs: f64) -> Self::Output {
         rhs * *self
+    }
+}
+impl Add<Aabb> for Vec3 {
+    type Output = Aabb;
+    fn add(self, rhs: Aabb) -> Self::Output {
+        rhs + self
     }
 }

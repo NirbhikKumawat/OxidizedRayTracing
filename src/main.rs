@@ -4,8 +4,10 @@ use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::quad::Quad;
+use OxidisedRayTracing::rotate::RotateY;
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
+use OxidisedRayTracing::translate::Translate;
 use OxidisedRayTracing::utility::{random_double, random_f64};
 use OxidisedRayTracing::vec3::{Point3, Vec3};
 use std::env;
@@ -260,17 +262,23 @@ fn cornell_box() -> HittableList {
         Vec3::new(0.0, 555.0, 0.0),
         white.clone(),
     )));
+    let box1 = Arc::new(Quad::cuboid(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
+        white.clone(),
+    ));
+    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
+    world.add(box1);
 
-    world.add(Arc::new(Quad::cuboid(
-        Point3::new(130.0, 0.0, 65.0),
-        Point3::new(295.0, 165.0, 230.0),
+    let box2 = Arc::new(Quad::cuboid(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
         white.clone(),
-    )));
-    world.add(Arc::new(Quad::cuboid(
-        Point3::new(265.0, 0.0, 295.0),
-        Point3::new(430.0, 330.0, 460.0),
-        white.clone(),
-    )));
+    ));
+    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
+    world.add(box2);
 
     let bvh = BvhNode::new_from_hittable(world);
     let mut world = HittableList::new();
