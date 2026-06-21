@@ -87,7 +87,7 @@ cargo run --release -- --img/final_scene.ppm
 *Checkerboard ground*
 
 ![2 schered spheres in proximity](img/SampleImg24.jpg)  
-*Two checkered spheres in close proximity*
+*Two checkered spheres in proximity*
 
 ![Globe using image texture](img/SampleImg25.jpg)  
 *Globe using image texture*
