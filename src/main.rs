@@ -17,7 +17,7 @@ use std::io::BufWriter;
 use std::sync::Arc;
 use std::time::Instant;
 
-fn bouncing_spheres() -> HittableList {
+fn _bouncing_spheres() -> HittableList {
     let mut world = HittableList::new();
     let checker = Arc::new(CheckerTexture::from_colors(
         0.32,
@@ -91,7 +91,7 @@ fn bouncing_spheres() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn earth() -> HittableList {
+fn _earth() -> HittableList {
     let mut world = HittableList::new();
     let earth_texture = Arc::new(ImageTexture::new("./textures/earthmap.jpg"));
     let earth_surface = Arc::new(Lambertian::new_from_texture(earth_texture));
@@ -102,7 +102,7 @@ fn earth() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn checkered_spheres() -> HittableList {
+fn _checkered_spheres() -> HittableList {
     let mut world = HittableList::new();
 
     let checker = Arc::new(CheckerTexture::from_colors(
@@ -126,7 +126,7 @@ fn checkered_spheres() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn perlin_spheres() -> HittableList {
+fn _perlin_spheres() -> HittableList {
     let mut world = HittableList::new();
     let pertext = Arc::new(NoiseTexture::<256>::new(4.0));
     let pertext = Arc::new(Lambertian::new_from_texture(pertext));
@@ -145,7 +145,7 @@ fn perlin_spheres() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn quads() -> HittableList {
+fn _quads() -> HittableList {
     let mut world = HittableList::new();
     let left_red = Arc::new(Lambertian::new(&Color::new(1.0, 0.2, 0.2)));
     let back_green = Arc::new(Lambertian::new(&Color::new(0.2, 1.0, 0.2)));
@@ -189,7 +189,7 @@ fn quads() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn simple_light() -> HittableList {
+fn _simple_light() -> HittableList {
     let mut world = HittableList::new();
     let pertext = Arc::new(NoiseTexture::<256>::new(4.0));
     let pertext = Arc::new(Lambertian::new_from_texture(pertext));
@@ -220,7 +220,7 @@ fn simple_light() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn cornell_box() -> HittableList {
+fn _cornell_box() -> HittableList {
     let mut world = HittableList::new();
     let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
     let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
@@ -286,7 +286,7 @@ fn cornell_box() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn cornell_smoke() -> HittableList {
+fn _cornell_smoke() -> HittableList {
     let mut world = HittableList::new();
 
     let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));

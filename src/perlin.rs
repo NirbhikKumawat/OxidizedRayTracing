@@ -7,6 +7,12 @@ pub struct Perlin<const N: usize> {
     perm_y: [usize; N],
     perm_z: [usize; N],
 }
+impl<const N: usize> Default for Perlin<N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const N: usize> Perlin<N> {
     pub fn new() -> Self {
         let perm_x = Self::perlin_generate_perm();
@@ -79,13 +85,13 @@ impl<const N: usize> Perlin<N> {
     }
     pub fn turb(&self, p: &Point3, depth: i32) -> f64 {
         let mut accum = 0.0;
-        let mut temp_p = p.clone();
+        let mut temp_p = *p;
         let mut weight = 1.0;
 
         for _ in 0..depth {
             accum += weight * self.noise(&temp_p);
             weight *= 0.5;
-            temp_p = temp_p * 2.0;
+            temp_p *= 2.0;
         }
         accum.abs()
     }

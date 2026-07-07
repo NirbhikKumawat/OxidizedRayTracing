@@ -1,7 +1,6 @@
 use crate::aabb::Aabb;
 use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
-use crate::interval;
 use crate::interval::{Interval, UNIVERSE};
 use crate::material::{Isotropic, Material};
 use crate::ray::Ray;
@@ -36,7 +35,7 @@ impl Hittable for ConstantMedium {
         let mut rec1 = self.boundary.hit(ray, UNIVERSE)?;
         let mut rec2 = self
             .boundary
-            .hit(ray, interval::Interval::new(rec1.t + 0.0001, INFINITY))?;
+            .hit(ray, Interval::new(rec1.t + 0.0001, INFINITY))?;
 
         if rec1.t < t.min {
             rec1.t = t.min;

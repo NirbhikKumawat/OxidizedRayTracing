@@ -184,7 +184,7 @@ impl Camera {
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
     }
     fn ray_color(&self, ray: &Ray, world: &HittableList, depth: u32) -> Color {
-        if depth <= 0 {
+        if depth == 0 {
             return Color::new(0.0, 0.0, 0.0);
         }
         if let Some(record) = world.hit(ray, Interval::new(0.001, INFINITY)) {

@@ -23,7 +23,7 @@ pub struct Lambertian {
 }
 impl Lambertian {
     pub fn new(albedo: &Color) -> Self {
-        let tex = Arc::new(SolidColor::new(albedo.clone()));
+        let tex = Arc::new(SolidColor::new(*albedo));
         Self { tex }
     }
     pub fn new_from_texture(tex: Arc<dyn Texture>) -> Self {
@@ -118,7 +118,7 @@ impl DiffuseLight {
         Self { tex }
     }
     pub fn new_from_color(emit: &Color) -> Self {
-        let tex = Arc::new(SolidColor::new(emit.clone()));
+        let tex = Arc::new(SolidColor::new(*emit));
         Self { tex }
     }
 }
@@ -135,7 +135,7 @@ impl Isotropic {
         Self { tex }
     }
     pub fn new_from_color(albedo: &Color) -> Self {
-        let tex = Arc::new(SolidColor::new(albedo.clone()));
+        let tex = Arc::new(SolidColor::new(*albedo));
         Self { tex }
     }
 }
