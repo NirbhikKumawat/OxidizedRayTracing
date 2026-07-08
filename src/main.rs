@@ -499,7 +499,7 @@ fn main() -> std::io::Result<()> {
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = cornell_box();
+    let world = _final_scene();
 
     let camera = Camera::new(
         aspect_ratio,

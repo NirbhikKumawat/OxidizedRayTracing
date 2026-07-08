@@ -138,8 +138,6 @@ cargo run --release -- --img/final_scene.ppm
 *Ray Tracing: The Next Week (Book 2) final scene (High Quality)*
 
 ## Known Issues & Limitations
-* **Single-threaded:** The renderer runs entirely on a single thread.
 * **BVH Overhead:** Using a bounding volume hierarchy (BVH) does not reduce render times if the scene contains only a few objects.
 * **High Render Times:** Producing high-quality images requires a large number of samples per pixel and deep ray recursion depths.
 * **Compiler Warnings:** The code compiles with minor warnings (e.g., the project name violates Rust's case conventions and a few unused functions exist).
-* **Limited Rotations:** Object rotation is currently only implemented for the Y-axis; X and Z-axis rotation support will be added in a future update.
