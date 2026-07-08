@@ -5,7 +5,10 @@ use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::utility::{INFINITY, degrees_to_radians, random_f64};
 use crate::vec3::{Point3, Vec3};
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelIterator;
 use std::io::Write;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub struct Camera {
     image_width: u32,
@@ -144,23 +147,51 @@ impl Camera {
             background,
         }
     }
-    pub fn render(&self, world: &HittableList, writer: &mut impl Write) -> std::io::Result<()> {
-        writeln!(
-            writer,
-            "P3\n{} {}\n255",
-            self.image_width, self.image_height
-        )?;
-        for j in 0..self.image_height {
-            eprintln!("Scanlines remaining: {}", self.image_height - j);
-            for i in 0..self.image_width {
+    fn multi_render(&self, world: &HittableList) -> Vec<Color> {
+        let total_pixels = self.image_width * self.image_height;
+        eprintln!(
+            "Rendering {} pixels across multiple threads...",
+            total_pixels
+        );
+
+        let pixels_renderd = AtomicUsize::new(0);
+
+        let pixels: Vec<Color> = (0..total_pixels)
+            .into_par_iter()
+            .map(|idx| {
+                let j = idx / self.image_width;
+                let i = idx % self.image_width;
+
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += self.ray_color(&r, world, self.max_depth);
                 }
                 pixel_color *= self.pixel_samples_scale;
-                print_color(&pixel_color, writer);
-            }
+                let completed = pixels_renderd.fetch_add(1, Ordering::Relaxed) + 1;
+                if completed.is_multiple_of(self.image_width as usize) {
+                    let scanlines_remaining =
+                        self.image_height as usize - (completed / self.image_width as usize);
+
+                    eprint!("\rScanlines remaining: {}    ", scanlines_remaining);
+                }
+
+                pixel_color
+            })
+            .collect();
+
+        pixels
+    }
+
+    pub fn render(&self, world: &HittableList, writer: &mut impl Write) -> std::io::Result<()> {
+        writeln!(
+            writer,
+            "P3\n{} {}\n255",
+            self.image_width, self.image_height
+        )?;
+        let pixels = self.multi_render(world);
+        for pixel in pixels {
+            print_color(&pixel, writer);
         }
         writer.flush()?;
         Ok(())
