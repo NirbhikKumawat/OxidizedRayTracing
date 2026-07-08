@@ -89,3 +89,179 @@ impl Hittable for RotateY {
         self.bbox
     }
 }
+
+pub struct RotateX {
+    object: Arc<dyn Hittable>,
+    sin_theta: f64,
+    cos_theta: f64,
+    bbox: Aabb,
+}
+impl RotateX {
+    pub fn new(object: Arc<dyn Hittable>, angle: f64) -> Self {
+        let radians = degrees_to_radians(angle);
+        let cos_theta = radians.cos();
+        let sin_theta = radians.sin();
+        let mut bbox = object.bounding_box();
+
+        let mut min = Point3::new(INFINITY, INFINITY, INFINITY);
+        let mut max = Point3::new(-INFINITY, -INFINITY, -INFINITY);
+
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+                    let x = i as f64 * bbox.x.max + (1.0 - i as f64) * bbox.x.min;
+                    let y = j as f64 * bbox.y.max + (1.0 - j as f64) * bbox.y.min;
+                    let z = k as f64 * bbox.z.max + (1.0 - k as f64) * bbox.z.min;
+
+                    let newy = cos_theta * y - sin_theta * z;
+                    let newz = sin_theta * y + cos_theta * z;
+                    let tester = Vec3::new(x, newy, newz);
+
+                    for c in 0..3 {
+                        min[c] = min[c].min(tester[c]);
+                        max[c] = max[c].max(tester[c]);
+                    }
+                }
+            }
+        }
+        bbox = Aabb::new_from_points(&min, &max);
+        Self {
+            bbox,
+            cos_theta,
+            sin_theta,
+            object,
+        }
+    }
+}
+impl Hittable for RotateX {
+    fn hit(&self, ray: &Ray, t: Interval) -> Option<HitRecord> {
+        let origin = Point3::new(
+            ray.origin().x(),
+            self.cos_theta * ray.origin().y() + self.sin_theta * ray.origin().z(),
+            -self.sin_theta * ray.origin().y() + self.cos_theta * ray.origin().z(),
+        );
+        let direction = Vec3::new(
+            ray.direction().x(),
+            self.cos_theta * ray.direction().y() + self.sin_theta * ray.direction().z(),
+            -self.sin_theta * ray.direction().y() + self.cos_theta * ray.direction().z(),
+        );
+        let rotated_ray = Ray::new_with_time(origin, direction, ray.time());
+        if let Some(record) = self.object.hit(&rotated_ray, t) {
+            let p = Point3::new(
+                record.p.x(),
+                self.cos_theta * record.p.y() - self.sin_theta * record.p.z(),
+                self.sin_theta * record.p.y() + self.cos_theta * record.p.z(),
+            );
+            let normal = Vec3::new(
+                record.normal.x(),
+                self.cos_theta * record.normal.y() - self.sin_theta * record.normal.z(),
+                self.sin_theta * record.normal.y() + self.cos_theta * record.normal.z(),
+            );
+            return Some(HitRecord {
+                p,
+                normal,
+                t: record.t,
+                mat: record.mat,
+                front_face: record.front_face,
+                u: record.u,
+                v: record.v,
+            });
+        }
+        None
+    }
+    fn bounding_box(&self) -> Aabb {
+        self.bbox
+    }
+}
+pub struct RotateZ {
+    object: Arc<dyn Hittable>,
+    sin_theta: f64,
+    cos_theta: f64,
+    bbox: Aabb,
+}
+
+impl RotateZ {
+    pub fn new(object: Arc<dyn Hittable>, angle: f64) -> Self {
+        let radians = degrees_to_radians(angle);
+        let cos_theta = radians.cos();
+        let sin_theta = radians.sin();
+        let mut bbox = object.bounding_box();
+
+        let mut min = Point3::new(INFINITY, INFINITY, INFINITY);
+        let mut max = Point3::new(-INFINITY, -INFINITY, -INFINITY);
+
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+                    let x = i as f64 * bbox.x.max + (1.0 - i as f64) * bbox.x.min;
+                    let y = j as f64 * bbox.y.max + (1.0 - j as f64) * bbox.y.min;
+                    let z = k as f64 * bbox.z.max + (1.0 - k as f64) * bbox.z.min;
+
+                    // FORWARD ROTATION
+                    let newx = cos_theta * x - sin_theta * y;
+                    let newy = sin_theta * x + cos_theta * y;
+                    let tester = Vec3::new(newx, newy, z);
+
+                    for c in 0..3 {
+                        min[c] = min[c].min(tester[c]);
+                        max[c] = max[c].max(tester[c]);
+                    }
+                }
+            }
+        }
+        bbox = Aabb::new_from_points(&min, &max);
+        Self {
+            bbox,
+            cos_theta,
+            sin_theta,
+            object,
+        }
+    }
+}
+
+impl Hittable for RotateZ {
+    fn hit(&self, ray: &Ray, t: Interval) -> Option<HitRecord> {
+        let origin = Point3::new(
+            self.cos_theta * ray.origin().x() + self.sin_theta * ray.origin().y(),
+            -self.sin_theta * ray.origin().x() + self.cos_theta * ray.origin().y(),
+            ray.origin().z(),
+        );
+
+        let direction = Vec3::new(
+            self.cos_theta * ray.direction().x() + self.sin_theta * ray.direction().y(),
+            -self.sin_theta * ray.direction().x() + self.cos_theta * ray.direction().y(),
+            ray.direction().z(),
+        );
+
+        let rotated_ray = Ray::new_with_time(origin, direction, ray.time());
+
+        if let Some(record) = self.object.hit(&rotated_ray, t) {
+            let p = Point3::new(
+                self.cos_theta * record.p.x() - self.sin_theta * record.p.y(),
+                self.sin_theta * record.p.x() + self.cos_theta * record.p.y(),
+                record.p.z(),
+            );
+
+            let normal = Vec3::new(
+                self.cos_theta * record.normal.x() - self.sin_theta * record.normal.y(),
+                self.sin_theta * record.normal.x() + self.cos_theta * record.normal.y(),
+                record.normal.z(),
+            );
+
+            return Some(HitRecord {
+                p,
+                normal,
+                t: record.t,
+                mat: record.mat,
+                front_face: record.front_face,
+                u: record.u,
+                v: record.v,
+            });
+        }
+        None
+    }
+
+    fn bounding_box(&self) -> Aabb {
+        self.bbox
+    }
+}

@@ -5,7 +5,7 @@ use OxidisedRayTracing::constant_medium::ConstantMedium;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::quad::Quad;
-use OxidisedRayTracing::rotate::RotateY;
+use OxidisedRayTracing::rotate::{RotateY, RotateZ};
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use OxidisedRayTracing::translate::Translate;
@@ -220,7 +220,7 @@ fn _simple_light() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn _cornell_box() -> HittableList {
+fn cornell_box() -> HittableList {
     let mut world = HittableList::new();
     let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
     let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
@@ -277,7 +277,7 @@ fn _cornell_box() -> HittableList {
         Point3::new(165.0, 165.0, 165.0),
         white.clone(),
     ));
-    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(RotateZ::new(box2, -45.0));
     let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
     world.add(box2);
 
@@ -361,7 +361,7 @@ fn _cornell_smoke() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn final_scene() -> HittableList {
+fn _final_scene() -> HittableList {
     let mut boxes1 = HittableList::new();
     let ground = Arc::new(Lambertian::new(&Color::new(0.48, 0.83, 0.53)));
 
@@ -488,18 +488,18 @@ fn main() -> std::io::Result<()> {
     let mut writer = BufWriter::new(file);
 
     let aspect_ratio = 1.0;
-    let image_width = 800;
-    let samples_per_pixel = 10000;
-    let max_depth = 40;
+    let image_width = 600;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
     let vfov = 40.0;
-    let look_from = Point3::new(478.0, 278.0, -600.0);
+    let look_from = Point3::new(278.0, 278.0, -800.0);
     let look_at = Point3::new(278.0, 278.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     //let defocus_angle = 0.6;
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = final_scene();
+    let world = cornell_box();
 
     let camera = Camera::new(
         aspect_ratio,
