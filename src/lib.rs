@@ -15,5 +15,6 @@ pub mod rotate;
 pub mod sphere;
 pub mod texture;
 pub mod translate;
+pub mod triangle;
 pub mod utility;
 pub mod vec3;
