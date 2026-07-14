@@ -4,6 +4,7 @@ use OxidisedRayTracing::color::Color;
 use OxidisedRayTracing::constant_medium::ConstantMedium;
 use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
+use OxidisedRayTracing::polygon_mesh::{add_polygon, generate_triangles_mesh};
 use OxidisedRayTracing::quad::Quad;
 use OxidisedRayTracing::rotate::{RotateY, RotateZ};
 use OxidisedRayTracing::sphere::Sphere;
@@ -365,13 +366,11 @@ fn _cornell_smoke() -> HittableList {
 fn _triangles() -> HittableList {
     let mut world = HittableList::new();
 
-    // Standard Cornell Box Materials
     let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
     let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
     let green = Arc::new(Lambertian::new(&Color::new(0.12, 0.45, 0.15)));
     let light = Arc::new(DiffuseLight::new_from_color(&Color::new(15.0, 15.0, 15.0)));
 
-    // Standard Cornell Box Walls
     world.add(Arc::new(Quad::new(
         Point3::new(555.0, 0.0, 0.0),
         Vec3::new(0.0, 555.0, 0.0),
@@ -409,13 +408,10 @@ fn _triangles() -> HittableList {
         white.clone(),
     )));
 
-    // Triangle Materials (Strictly Lambertian for testing)
     let mat_blue = Arc::new(Lambertian::new(&Color::new(0.2, 0.2, 0.8)));
     let mat_orange = Arc::new(Lambertian::new(&Color::new(1.0, 0.5, 0.0)));
     let mat_teal = Arc::new(Lambertian::new(&Color::new(0.2, 0.8, 0.8)));
 
-    // Triangle 1 (Blue): Large, centered, tilted backward.
-    // Tests standard depth sorting and surface normal catching overhead light.
     world.add(Arc::new(Triangle::new(
         Point3::new(150.0, 100.0, 300.0),
         Point3::new(400.0, 100.0, 300.0),
@@ -423,8 +419,6 @@ fn _triangles() -> HittableList {
         mat_blue,
     )));
 
-    // Triangle 2 (Orange): Floating low on the left, tilted slightly up.
-    // Tests extreme glancing angles and bounced shadows from the floor.
     world.add(Arc::new(Triangle::new(
         Point3::new(100.0, 50.0, 100.0),
         Point3::new(250.0, 80.0, 150.0),
@@ -432,14 +426,97 @@ fn _triangles() -> HittableList {
         mat_orange,
     )));
 
-    // Triangle 3 (Teal): Sharp acute angle, vertical diagonal slice on the right.
-    // Tests BVH bounds robustness on tall/skinny diagonal planes.
     world.add(Arc::new(Triangle::new(
         Point3::new(450.0, 50.0, 100.0),
         Point3::new(400.0, 400.0, 200.0),
         Point3::new(450.0, 50.0, 300.0),
         mat_teal,
     )));
+
+    let bvh = BvhNode::new_from_hittable(world);
+    let mut world = HittableList::new();
+    world.add(Arc::new(bvh));
+    world
+}
+fn _polygons() -> HittableList {
+    let mut world = HittableList::new();
+
+    let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(Lambertian::new(&Color::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_from_color(&Color::new(15.0, 15.0, 15.0)));
+
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(343.0, 554.0, 332.0),
+        Vec3::new(-130.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -105.0),
+        light,
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 555.0, 555.0),
+        Vec3::new(-555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white.clone(),
+    )));
+
+    let mat_pyramid = Arc::new(Lambertian::new(&Color::new(0.8, 0.6, 0.2)));
+    let pyramid_verts = vec![
+        Point3::new(100.0, 0.0, 100.0),
+        Point3::new(250.0, 0.0, 100.0),
+        Point3::new(250.0, 0.0, 250.0),
+        Point3::new(100.0, 0.0, 250.0),
+        Point3::new(175.0, 250.0, 175.0),
+    ];
+    let pyramid_indices = vec![0, 1, 2, 0, 2, 3, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4];
+    let pyramid_mesh = generate_triangles_mesh(&pyramid_verts, &pyramid_indices, mat_pyramid);
+    world.add(Arc::new(BvhNode::new_from_hittable(pyramid_mesh)));
+
+    let mat_box = Arc::new(Lambertian::new(&Color::new(0.3, 0.3, 0.9)));
+
+    let box_verts = vec![
+        Point3::new(300.0, 200.0, 300.0),
+        Point3::new(450.0, 250.0, 280.0),
+        Point3::new(400.0, 400.0, 280.0),
+        Point3::new(250.0, 350.0, 300.0),
+        Point3::new(320.0, 200.0, 450.0),
+        Point3::new(470.0, 250.0, 430.0),
+        Point3::new(420.0, 400.0, 430.0),
+        Point3::new(270.0, 350.0, 450.0),
+    ];
+
+    let mut box_mesh = HittableList::new();
+    add_polygon(&box_verts, &[0, 1, 2, 3], mat_box.clone(), &mut box_mesh);
+    add_polygon(&box_verts, &[5, 4, 7, 6], mat_box.clone(), &mut box_mesh);
+    add_polygon(&box_verts, &[3, 2, 6, 7], mat_box.clone(), &mut box_mesh);
+    add_polygon(&box_verts, &[4, 5, 1, 0], mat_box.clone(), &mut box_mesh);
+    add_polygon(&box_verts, &[1, 5, 6, 2], mat_box.clone(), &mut box_mesh);
+    add_polygon(&box_verts, &[4, 0, 3, 7], mat_box.clone(), &mut box_mesh);
+
+    world.add(Arc::new(BvhNode::new_from_hittable(box_mesh)));
 
     let bvh = BvhNode::new_from_hittable(world);
     let mut final_world = HittableList::new();
@@ -584,7 +661,7 @@ fn main() -> std::io::Result<()> {
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = _triangles();
+    let world = _polygons();
 
     let camera = Camera::new(
         aspect_ratio,

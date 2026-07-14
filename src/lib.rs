@@ -9,6 +9,7 @@ pub mod img;
 pub mod interval;
 pub mod material;
 pub mod perlin;
+pub mod polygon_mesh;
 pub mod quad;
 pub mod ray;
 pub mod rotate;
