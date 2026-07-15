@@ -249,7 +249,3 @@ impl Camera {
         Vec3::new(px, py, 0.0)
     }
 }
-
-fn sample_square() -> Vec3 {
-    Vec3::new(random_f64() - 0.5, random_f64() - 0.5, 0.0)
-}

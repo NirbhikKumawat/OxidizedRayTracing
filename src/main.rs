@@ -6,7 +6,7 @@ use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::polygon_mesh::{add_polygon, generate_triangles_mesh};
 use OxidisedRayTracing::quad::Quad;
-use OxidisedRayTracing::rotate::RotateY;
+use OxidisedRayTracing::rotate::{Axis, Rotate};
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use OxidisedRayTracing::translate::Translate;
@@ -270,7 +270,7 @@ fn _cornell_box() -> HittableList {
         Point3::new(165.0, 330.0, 165.0),
         white.clone(),
     ));
-    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Rotate::new(box1, 15.0, Axis::Y));
     let box1 = Arc::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
     world.add(box1);
 
@@ -279,7 +279,7 @@ fn _cornell_box() -> HittableList {
         Point3::new(165.0, 165.0, 165.0),
         white.clone(),
     ));
-    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Rotate::new(box2, -18.0, Axis::Y));
     let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
     world.add(box2);
 
@@ -338,7 +338,7 @@ fn _cornell_smoke() -> HittableList {
         Point3::new(165.0, 330.0, 165.0),
         white.clone(),
     ));
-    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Rotate::new(box1, 15.0, Axis::Y));
     let box1 = Arc::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
     world.add(Arc::new(ConstantMedium::new_from_color(
         box1,
@@ -350,7 +350,7 @@ fn _cornell_smoke() -> HittableList {
         Point3::new(165.0, 165.0, 165.0),
         white.clone(),
     ));
-    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Rotate::new(box2, -18.0, Axis::Y));
     let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
     world.add(Arc::new(ConstantMedium::new_from_color(
         box2,
@@ -629,7 +629,7 @@ fn _final_scene() -> HittableList {
         )));
     }
     let boxes2_bvh = Arc::new(BvhNode::new_from_hittable(boxes2));
-    let boxes2_rotated = Arc::new(RotateY::new(boxes2_bvh, 15.0));
+    let boxes2_rotated = Arc::new(Rotate::new(boxes2_bvh, 15.0, Axis::Y));
     let boxes2_translated = Arc::new(Translate::new(
         boxes2_rotated,
         Vec3::new(-100.0, 270.0, 395.0),

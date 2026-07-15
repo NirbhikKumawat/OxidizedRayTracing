@@ -18,10 +18,7 @@ impl<const N: usize> Perlin<N> {
         let perm_x = Self::perlin_generate_perm();
         let perm_y = Self::perlin_generate_perm();
         let perm_z = Self::perlin_generate_perm();
-        let mut rand_vec = [Vec3::default(); N];
-        for i in 0..N {
-            rand_vec[i] = Vec3::random_vector3(-1.0, 1.0);
-        }
+        let rand_vec = std::array::from_fn(|_| Vec3::random_vector3(-1.0, 1.0));
         Self {
             perm_x,
             perm_y,
@@ -39,25 +36,22 @@ impl<const N: usize> Perlin<N> {
         let k = p.z().floor() as i32;
 
         let mut c = [[[Vec3::default(); 2]; 2]; 2];
-        for di in 0..2 {
-            for dj in 0..2 {
-                for dk in 0..2 {
+        for (di, row_2d) in c.iter_mut().enumerate() {
+            for (dj, row_1d) in row_2d.iter_mut().enumerate() {
+                for (dk, val) in row_1d.iter_mut().enumerate() {
                     let x = ((i + di as i32) & 255) as usize;
                     let y = ((j + dj as i32) & 255) as usize;
                     let z = ((k + dk as i32) & 255) as usize;
                     let perm_idx = self.perm_x[x] ^ self.perm_y[y] ^ self.perm_z[z];
-
-                    c[di][dj][dk] = self.rand_vec[perm_idx];
+                    *val = self.rand_vec[perm_idx];
                 }
             }
         }
+
         Self::perlin_interp(c, u, v, w)
     }
     fn perlin_generate_perm() -> [usize; N] {
-        let mut p = [0; N];
-        for i in 0..N {
-            p[i] = i;
-        }
+        let mut p = std::array::from_fn(|i| i);
         for i in (0..N).rev() {
             let target = random_int(0, i as i32) as usize;
             p.swap(i, target);
@@ -69,15 +63,14 @@ impl<const N: usize> Perlin<N> {
         let vv = v * v * (3.0 - 2.0 * v);
         let ww = w * w * (3.0 - 2.0 * w);
         let mut accum = 0.0;
-
-        for i in 0..2 {
-            for j in 0..2 {
-                for k in 0..2 {
+        for (i, row_2d) in c.iter().enumerate() {
+            for (j, row_1d) in row_2d.iter().enumerate() {
+                for (k, val) in row_1d.iter().enumerate() {
                     let weight = Vec3::new(u - i as f64, v - j as f64, w - k as f64);
                     accum += (i as f64 * uu + (1.0 - i as f64) * (1.0 - uu))
                         * (j as f64 * vv + (1.0 - j as f64) * (1.0 - vv))
                         * (k as f64 * ww + (1.0 - k as f64) * (1.0 - ww))
-                        * Vec3::dot(c[i][j][k], weight);
+                        * Vec3::dot(*val, weight);
                 }
             }
         }
