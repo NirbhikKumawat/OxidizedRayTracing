@@ -6,7 +6,7 @@ use OxidisedRayTracing::hittable_list::HittableList;
 use OxidisedRayTracing::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use OxidisedRayTracing::polygon_mesh::{add_polygon, generate_triangles_mesh};
 use OxidisedRayTracing::quad::Quad;
-use OxidisedRayTracing::rotate::{RotateY, RotateZ};
+use OxidisedRayTracing::rotate::RotateY;
 use OxidisedRayTracing::sphere::Sphere;
 use OxidisedRayTracing::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use OxidisedRayTracing::translate::Translate;
@@ -222,7 +222,7 @@ fn _simple_light() -> HittableList {
     world.add(Arc::new(bvh));
     world
 }
-fn cornell_box() -> HittableList {
+fn _cornell_box() -> HittableList {
     let mut world = HittableList::new();
     let red = Arc::new(Lambertian::new(&Color::new(0.65, 0.05, 0.05)));
     let white = Arc::new(Lambertian::new(&Color::new(0.73, 0.73, 0.73)));
@@ -231,39 +231,39 @@ fn cornell_box() -> HittableList {
 
     world.add(Arc::new(Quad::new(
         Point3::new(555.0, 0.0, 0.0),
-        Vec3::new(0.0, 555.0, 0.0),
         Vec3::new(0.0, 0.0, 555.0),
+        Vec3::new(0.0, 555.0, 0.0),
         green,
     )));
     world.add(Arc::new(Quad::new(
-        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(0.0, 0.0, 555.0),
+        Vec3::new(0.0, 0.0, -555.0),
         Vec3::new(0.0, 555.0, 0.0),
-        Vec3::new(0.0, 0.0, 555.0),
         red,
     )));
     world.add(Arc::new(Quad::new(
-        Point3::new(343.0, 554.0, 332.0),
-        Vec3::new(-130.0, 0.0, 0.0),
-        Vec3::new(0.0, 0.0, -105.0),
-        light,
-    )));
-    world.add(Arc::new(Quad::new(
-        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(0.0, 555.0, 0.0),
         Vec3::new(555.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, 555.0),
-        white.clone(),
-    )));
-    world.add(Arc::new(Quad::new(
-        Point3::new(555.0, 555.0, 555.0),
-        Vec3::new(-555.0, 0.0, 0.0),
-        Vec3::new(0.0, 0.0, -555.0),
         white.clone(),
     )));
     world.add(Arc::new(Quad::new(
         Point3::new(0.0, 0.0, 555.0),
         Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -555.0),
+        white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(555.0, 0.0, 555.0),
+        Vec3::new(-555.0, 0.0, 0.0),
         Vec3::new(0.0, 555.0, 0.0),
         white.clone(),
+    )));
+    world.add(Arc::new(Quad::new(
+        Point3::new(213.0, 554.0, 227.0),
+        Vec3::new(130.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 105.0),
+        light.clone(),
     )));
     let box1 = Arc::new(Quad::cuboid(
         Point3::new(0.0, 0.0, 0.0),
@@ -279,7 +279,7 @@ fn cornell_box() -> HittableList {
         Point3::new(165.0, 165.0, 165.0),
         white.clone(),
     ));
-    let box2 = Arc::new(RotateZ::new(box2, -45.0));
+    let box2 = Arc::new(RotateY::new(box2, -18.0));
     let box2 = Arc::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
     world.add(box2);
 
@@ -651,7 +651,7 @@ fn main() -> std::io::Result<()> {
 
     let aspect_ratio = 1.0;
     let image_width = 600;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 1000;
     let max_depth = 50;
     let vfov = 40.0;
     let look_from = Point3::new(278.0, 278.0, -800.0);
@@ -661,7 +661,7 @@ fn main() -> std::io::Result<()> {
     //let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = _polygons();
+    let world = _cornell_box();
 
     let camera = Camera::new(
         aspect_ratio,
